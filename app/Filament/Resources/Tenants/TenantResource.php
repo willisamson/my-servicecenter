@@ -35,11 +35,7 @@ class TenantResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public const BRANCHEN = [
-        'heizung' => 'Heizung & Sanitär',
-        'garten' => 'Garten- & Landschaftsbau',
-        'floristik' => 'Floristik',
-    ];
+    public const BRANCHEN = Tenant::BRANCHEN;
 
     public static function form(Schema $schema): Schema
     {

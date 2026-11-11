@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'rolle'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -32,12 +32,33 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    public const ROLLEN = [
+        'inhaber' => 'Inhaber',
+        'buero' => 'Büro',
+        'mitarbeiter' => 'Mitarbeiter',
+    ];
+
     /**
      * Wer darf in welches Filament-Panel?
-     * Der Admin-Bereich ist nur auf der zentralen Domain erreichbar (Benutzer der zentralen Datenbank).
+     * - admin:   nur auf der zentralen Domain (Benutzer der zentralen Datenbank)
+     * - betrieb: nur auf der Subdomain eines Betriebs (Benutzer aus dessen Datenbank)
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $panel->getId() === 'admin' && ! tenancy()->initialized;
+        return match ($panel->getId()) {
+            'admin' => ! tenancy()->initialized,
+            'betrieb' => tenancy()->initialized,
+            default => false,
+        };
+    }
+
+    public function istInhaber(): bool
+    {
+        return $this->rolle === 'inhaber';
+    }
+
+    public function istBueroOderInhaber(): bool
+    {
+        return in_array($this->rolle, ['inhaber', 'buero'], true);
     }
 }

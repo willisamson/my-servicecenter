@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -71,6 +72,27 @@ class TenantResource extends Resource
             Toggle::make('aktiv')
                 ->label('Aktiv')
                 ->default(true),
+            Section::make('Inhaber-Zugang')
+                ->description('Damit meldet sich der Inhaber unter <subdomain>/dashboard an. Wird nur beim Anlegen abgefragt.')
+                ->visibleOn('create')
+                ->columnSpanFull()
+                ->schema([
+                    TextInput::make('inhaber_name')
+                        ->label('Name des Inhabers')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('inhaber_email')
+                        ->label('E-Mail des Inhabers')
+                        ->email()
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('inhaber_passwort')
+                        ->label('Start-Passwort')
+                        ->password()
+                        ->revealable()
+                        ->required()
+                        ->minLength(8),
+                ]),
         ]);
     }
 

@@ -29,6 +29,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->domains(config('tenancy.central_domains')) // nur auf der zentralen Domain, nicht bei Betrieben
             ->brandName('my-servicecenter')
+            ->brandLogo(fn (): ?string => \App\Models\Einstellung::logoUrl())
+            ->brandLogoHeight('2.25rem')
             ->login()
             ->colors([
                 'primary' => Color::Orange,

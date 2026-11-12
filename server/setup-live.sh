@@ -112,6 +112,7 @@ echo "== Frontend bauen ==";        if [ -f package-lock.json ]; then sudo -u se
                                     sudo -u servicecenter -H npm run build
 echo "== Datenbank ==";             sudo -u servicecenter php artisan migrate --force
 echo "== Betriebs-Datenbanken ==";  sudo -u servicecenter php artisan tenants:migrate --force
+echo "== Speicher-Link ==";        sudo -u servicecenter php artisan storage:link >/dev/null 2>&1 || true
 echo "== Cache ==";                 sudo -u servicecenter php artisan optimize
 systemctl reload php$PHPV-fpm
 echo "== Live-Deploy fertig: https://$DOMAIN =="

@@ -37,31 +37,9 @@ class Anfrage extends Model
         'abgelehnt' => 'gray',
     ];
 
-    public const ANLIEGEN = [
-        'heizung' => [
-            'stoerung' => 'Heizung heizt nicht / Störung',
-            'wartung' => 'Wartung',
-            'tausch' => 'Heizungstausch',
-            'waermepumpe' => 'Wärmepumpe',
-            'sonstiges' => 'Sonstiges',
-        ],
-        'garten' => [
-            'pflege' => 'Gartenpflege',
-            'neuanlage' => 'Neuanlage / Umgestaltung',
-            'schnitt' => 'Baum- und Heckenschnitt',
-            'sonstiges' => 'Sonstiges',
-        ],
-        'floristik' => [
-            'strauss' => 'Blumenstrauß',
-            'anlass' => 'Hochzeit / Feier',
-            'trauer' => 'Trauerfloristik',
-            'sonstiges' => 'Sonstiges',
-        ],
-    ];
-
     public static function anliegenFuer(?string $branche): array
     {
-        return self::ANLIEGEN[$branche] ?? ['sonstiges' => 'Anfrage'];
+        return Branche::anliegenFuer($branche);
     }
 
     protected static function booted(): void

@@ -17,12 +17,6 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 {
     use HasDatabase, HasDomains;
 
-    public const BRANCHEN = [
-        'heizung' => 'Heizung & Sanitär',
-        'garten' => 'Garten- & Landschaftsbau',
-        'floristik' => 'Floristik',
-    ];
-
     /**
      * Echte Spalten der Tabelle "tenants". Alles andere landet im JSON-Feld "data".
      */
@@ -69,7 +63,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
     public function brancheLabel(): string
     {
-        return self::BRANCHEN[$this->branche] ?? (string) $this->branche;
+        return Branche::label($this->branche);
     }
 
     /** Kürzel für das Logo-Feld, z. B. "Heinz der Heizfritze" → "HD". */

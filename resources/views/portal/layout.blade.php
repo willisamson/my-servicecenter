@@ -34,8 +34,12 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.03em;line-heigh
 <header class="top">
   <div class="wrap">
     <a class="brand" href="/">
-      <span class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5"/><path d="M12 12v9"/><path d="M12 12L4 7.5"/></svg></span>
-      my-servicecenter
+      @if($logoUrl = \App\Models\Einstellung::logoUrl())
+        <img src="{{ $logoUrl }}" alt="my-servicecenter" style="height:40px;width:auto;display:block">
+      @else
+        <span class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5"/><path d="M12 12v9"/><path d="M12 12L4 7.5"/></svg></span>
+        my-servicecenter
+      @endif
     </a>
     <nav class="nav" aria-label="Hauptnavigation">
       <a href="/#so-gehts">So funktioniert’s</a>

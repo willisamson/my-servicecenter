@@ -3,7 +3,7 @@
 @php
     $central = config('tenancy.central_domains')[0];
     $demoUrl = request()->getScheme().'://demo.'.$central;
-    $kontakt = config('portal.email');
+    $kontakt = \App\Models\Einstellung::wert('email', config('portal.email'));
 @endphp
 
 @push('styles')

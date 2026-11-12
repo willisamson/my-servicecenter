@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tenants;
 use App\Filament\Resources\Tenants\Pages\CreateTenant;
 use App\Filament\Resources\Tenants\Pages\EditTenant;
 use App\Filament\Resources\Tenants\Pages\ListTenants;
+use App\Models\Branche;
 use App\Models\Tenant;
 use BackedEnum;
 use Filament\Actions\EditAction;
@@ -35,8 +36,6 @@ class TenantResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public const BRANCHEN = Tenant::BRANCHEN;
-
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -55,7 +54,7 @@ class TenantResource extends Resource
                 ->suffix('.'.config('tenancy.central_domains')[0]),
             Select::make('branche')
                 ->label('Branche')
-                ->options(self::BRANCHEN)
+                ->options(fn (): array => Branche::optionen())
                 ->default('heizung')
                 ->required(),
             TextInput::make('ort')
@@ -107,7 +106,7 @@ class TenantResource extends Resource
                     ->openUrlInNewTab(),
                 TextColumn::make('branche')
                     ->label('Branche')
-                    ->formatStateUsing(fn (?string $state): string => self::BRANCHEN[$state] ?? (string) $state),
+                    ->formatStateUsing(fn (?string $state): string => Branche::label($state)),
                 TextColumn::make('ort')
                     ->label('Ort')
                     ->searchable(),

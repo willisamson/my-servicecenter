@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AnfrageBestaetigung;
+use App\Mail\NeueAnfrageAnBetrieb;
 use App\Models\Anfrage;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 /**
  * Öffentliche Seiten eines Betriebs: Mini-Website, Anfrageformular, Status-Seite.
@@ -55,9 +60,52 @@ class BetriebWebsiteController extends Controller
 
         $anfrage = Anfrage::create($daten);
 
+        $this->benachrichtigen($anfrage);
+
         return redirect()
             ->route('betrieb.status', $anfrage->status_token)
             ->with('neu', true);
+    }
+
+    /**
+     * E-Mail an den Betrieb und – falls angegeben – Bestätigung an den Kunden.
+     * Ein Mail-Fehler darf die Anfrage nicht verhindern, deshalb nur protokollieren.
+     */
+    protected function benachrichtigen(Anfrage $anfrage): void
+    {
+        $betrieb = tenant();
+
+        try {
+            $empfaenger = $betrieb->email ?: User::where('rolle', 'inhaber')->pluck('email')->all();
+
+            if (! empty($empfaenger)) {
+                Mail::to($empfaenger)->send(new NeueAnfrageAnBetrieb($anfrage, $betrieb->name, url('/dashboard/anfragen/'.$anfrage->getKey().'/edit')));
+            }
+
+            if ($anfrage->email) {
+                Mail::to($anfrage->email)->send(new AnfrageBestaetigung($anfrage, $betrieb->name, $betrieb->email, $betrieb->telefon));
+            }
+        } catch (Throwable $fehler) {
+            report($fehler);
+        }
+    }
+
+    public function impressum()
+    {
+        return view('betrieb.rechtliches', [
+            'betrieb' => tenant(),
+            'titel' => 'Impressum',
+            'text' => tenant('impressum'),
+        ]);
+    }
+
+    public function datenschutz()
+    {
+        return view('betrieb.rechtliches', [
+            'betrieb' => tenant(),
+            'titel' => 'Datenschutzerklärung',
+            'text' => tenant('datenschutz'),
+        ]);
     }
 
     public function status(string $token)

@@ -102,7 +102,7 @@
 
     <div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
-    <label class="check"><input type="checkbox" name="datenschutz" value="1" @checked(old('datenschutz')) required><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden (<a href="#">Datenschutz</a>).</span></label>
+    <label class="check"><input type="checkbox" name="datenschutz" value="1" @checked(old('datenschutz')) required><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden (<a href="{{ route('betrieb.datenschutz') }}" target="_blank">Datenschutzerklärung</a>).</span></label>
     @error('datenschutz')<span class="fehler">{{ $message }}</span>@enderror
 
     <button type="submit" class="btn">Anfrage senden</button>

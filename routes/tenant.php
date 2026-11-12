@@ -23,4 +23,6 @@ Route::middleware([
         ->middleware('throttle:5,1')
         ->name('betrieb.anfrage');
     Route::get('/status/{token}', [BetriebWebsiteController::class, 'status'])->name('betrieb.status');
+    Route::get('/impressum', [BetriebWebsiteController::class, 'impressum'])->name('betrieb.impressum');
+    Route::get('/datenschutz', [BetriebWebsiteController::class, 'datenschutz'])->name('betrieb.datenschutz');
 });

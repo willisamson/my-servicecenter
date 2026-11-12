@@ -35,6 +35,7 @@ class Betriebsprofil extends Page
     protected const FELDER = [
         'name', 'ort', 'email', 'telefon', 'strasse', 'plz',
         'beschreibung', 'leistungen', 'oeffnungszeiten', 'notdienst',
+        'impressum', 'datenschutz',
     ];
 
     public ?array $data = [];
@@ -61,7 +62,11 @@ class Betriebsprofil extends Page
                         TextInput::make('plz')->label('PLZ')->maxLength(10),
                         TextInput::make('ort')->label('Ort')->maxLength(255),
                         TextInput::make('telefon')->label('Telefon')->tel()->maxLength(50),
-                        TextInput::make('email')->label('E-Mail')->email()->maxLength(255),
+                        TextInput::make('email')
+                            ->label('E-Mail')
+                            ->email()
+                            ->maxLength(255)
+                            ->helperText('An diese Adresse schicken wir neue Anfragen. Leer = an alle Inhaber.'),
                     ]),
                 Section::make('Auftritt')
                     ->schema([
@@ -79,6 +84,21 @@ class Betriebsprofil extends Page
                             ->maxLength(500),
                         Toggle::make('notdienst')
                             ->label('Notdienst verfügbar'),
+                    ]),
+                Section::make('Rechtliches')
+                    ->description('Pflichtangaben für die Mini-Website. Ohne Impressum und Datenschutzerklärung sollte die Seite nicht für Kunden freigegeben werden.')
+                    ->collapsible()
+                    ->schema([
+                        Textarea::make('impressum')
+                            ->label('Impressum')
+                            ->helperText('Typisch für Handwerksbetriebe: Name und Rechtsform, Anschrift, Vertretungsberechtigte, Telefon und E-Mail, Registereintrag, USt-IdNr., zuständige Handwerkskammer und Berufsbezeichnung.')
+                            ->rows(10)
+                            ->maxLength(20000),
+                        Textarea::make('datenschutz')
+                            ->label('Datenschutzerklärung')
+                            ->helperText('Muss u. a. das Anfrageformular und my-servicecenter als technischen Dienstleister abdecken. Am sichersten mit einem Generator oder Anwalt erstellen.')
+                            ->rows(14)
+                            ->maxLength(60000),
                     ]),
             ])
             ->statePath('data');

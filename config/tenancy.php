@@ -53,7 +53,7 @@ return [
          * Tenant database names are created like this:
          * prefix + tenant_id + suffix.
          */
-        'prefix' => 'sc_tenant_', // ergibt z. B. sc_tenant_musterbetrieb (passt zu den DB-Rechten sc_%)
+        'prefix' => env('TENANCY_DB_PREFIX', 'sc_tenant_'), // z. B. sc_tenant_heinz; Live-Umgebung nutzt einen eigenen Präfix (passt zu den DB-Rechten sc_%)
         'suffix' => '',
 
         /**

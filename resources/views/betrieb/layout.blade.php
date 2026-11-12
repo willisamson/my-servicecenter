@@ -49,7 +49,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 </main>
 <footer class="footer">
   <div class="wrap">
-    <div style="display:flex;gap:18px;flex-wrap:wrap"><a href="#">Impressum</a><a href="#">Datenschutz</a></div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap"><a href="{{ route('betrieb.impressum') }}">Impressum</a><a href="{{ route('betrieb.datenschutz') }}">Datenschutz</a></div>
     <span>Erstellt mit my-servicecenter</span>
   </div>
 </footer>

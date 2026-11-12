@@ -67,6 +67,10 @@ class TenantResource extends Resource
             Toggle::make('aktiv')
                 ->label('Aktiv')
                 ->default(true),
+            Toggle::make('im_portal')
+                ->label('In der Portal-Suche')
+                ->helperText('Nur einschalten, wenn Impressum und Datenschutz des Betriebs fertig sind.')
+                ->default(false),
             Section::make('Inhaber-Zugang')
                 ->description('Damit meldet sich der Inhaber unter <subdomain>/dashboard an. Wird nur beim Anlegen abgefragt.')
                 ->visibleOn('create')
@@ -112,6 +116,9 @@ class TenantResource extends Resource
                     ->searchable(),
                 IconColumn::make('aktiv')
                     ->label('Aktiv')
+                    ->boolean(),
+                IconColumn::make('im_portal')
+                    ->label('In Suche')
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->label('Angelegt')

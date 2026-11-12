@@ -35,7 +35,7 @@ class Betriebsprofil extends Page
     protected const FELDER = [
         'name', 'ort', 'email', 'telefon', 'strasse', 'plz',
         'beschreibung', 'leistungen', 'oeffnungszeiten', 'notdienst',
-        'impressum', 'datenschutz',
+        'impressum', 'datenschutz', 'im_portal',
     ];
 
     public ?array $data = [];
@@ -85,6 +85,12 @@ class Betriebsprofil extends Page
                         Toggle::make('notdienst')
                             ->label('Notdienst verfügbar'),
                     ]),
+                Section::make('Sichtbarkeit')
+                    ->schema([
+                        Toggle::make('im_portal')
+                            ->label('In der Suche auf my-servicecenter.com anzeigen')
+                            ->helperText('Kunden finden Sie dann über Branche und Ort. Geht erst, wenn Impressum und Datenschutzerklärung ausgefüllt sind.'),
+                    ]),
                 Section::make('Rechtliches')
                     ->description('Pflichtangaben für die Mini-Website. Ohne Impressum und Datenschutzerklärung sollte die Seite nicht für Kunden freigegeben werden.')
                     ->collapsible()
@@ -123,6 +129,19 @@ class Betriebsprofil extends Page
     public function save(): void
     {
         $daten = $this->form->getState();
+
+        // Ohne Pflichtangaben nicht öffentlich auflisten.
+        if (! empty($daten['im_portal']) && (blank($daten['impressum'] ?? null) || blank($daten['datenschutz'] ?? null))) {
+            $daten['im_portal'] = false;
+            $this->data['im_portal'] = false;
+
+            Notification::make()
+                ->title('Noch nicht in der Suche sichtbar')
+                ->body('Bitte zuerst Impressum und Datenschutzerklärung ausfüllen. Alles andere wurde gespeichert.')
+                ->warning()
+                ->persistent()
+                ->send();
+        }
 
         tenant()->update(array_intersect_key($daten, array_flip(self::FELDER)));
 

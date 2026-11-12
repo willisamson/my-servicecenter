@@ -22,7 +22,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
      */
     public static function getCustomColumns(): array
     {
-        return ['id', 'name', 'branche', 'ort', 'email', 'aktiv'];
+        return ['id', 'name', 'branche', 'ort', 'email', 'aktiv', 'im_portal'];
     }
 
     /**
@@ -48,7 +48,26 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     {
         return [
             'aktiv' => 'boolean',
+            'im_portal' => 'boolean',
         ];
+    }
+
+    /** Betriebe, die in der Portal-Suche erscheinen dürfen. */
+    public function scopeImPortal($query)
+    {
+        return $query->where('aktiv', true)->where('im_portal', true);
+    }
+
+    /** Ort als Adressteil, z. B. "Bad Homburg" → "bad-homburg", "München" → "muenchen". */
+    public function ortSlug(): string
+    {
+        return \Illuminate\Support\Str::slug((string) $this->ort, '-', 'de');
+    }
+
+    /** Erste Zeilen der Beschreibung für die Trefferliste. */
+    public function kurzbeschreibung(int $laenge = 180): string
+    {
+        return \Illuminate\Support\Str::limit(trim((string) $this->beschreibung), $laenge);
     }
 
     /**

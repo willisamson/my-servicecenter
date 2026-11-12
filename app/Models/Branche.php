@@ -59,6 +59,11 @@ class Branche extends Model
         return $optionen;
     }
 
+    public static function finde(?string $slug): ?self
+    {
+        return $slug !== null ? (static::alle()[$slug] ?? null) : null;
+    }
+
     public static function label(?string $slug): string
     {
         return isset(static::alle()[$slug]) ? static::alle()[$slug]->name : (string) $slug;

@@ -20,18 +20,24 @@
 .karte{background:var(--bg);border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:12px}
 .dunkel{max-width:1140px;margin:72px auto 0;background:var(--ink);color:#fff;border-radius:32px;padding:56px 40px;display:flex;flex-wrap:wrap;gap:40px}
 .dunkel .grid .karte{background:var(--dark2)}
+.branchen{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.branche{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--ink)}
+.branche:hover{border-color:var(--accent);color:var(--ink)}
 </style>
 @endpush
 
 @section('content')
 <section class="wrap hero">
   <div class="hero-text">
-    <span class="pill" style="align-self:flex-start">Startet bald – zuerst mit Heizungsbetrieben</span>
+    <span class="pill" style="align-self:flex-start">Pilotphase – die ersten Betriebe sind dabei</span>
     <h1>Der richtige Fachbetrieb. <span style="color:var(--accent)">Live verfolgt</span> bis zur Rechnung.</h1>
     <p class="muted" style="margin:0;font-size:19px;max-width:560px">my-servicecenter verbindet Sie mit Handwerks- und Servicebetrieben aus Ihrer Region. Anfrage per Klick, und danach sehen Sie jederzeit, wann der Monteur kommt.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
-      <a class="btn" href="{{ $demoUrl }}">Beispiel-Betrieb ansehen</a>
-      <a href="#betriebe" style="font-weight:600">Sie sind ein Betrieb? →</a>
+    <div id="suche" style="display:flex;flex-direction:column;gap:12px;max-width:620px">
+      @include('portal._suchformular')
+      <div style="display:flex;flex-wrap:wrap;gap:18px;font-size:15px">
+        <a href="{{ $demoUrl }}" style="font-weight:600">Beispiel-Betrieb ansehen →</a>
+        <a href="#betriebe" style="font-weight:600">Sie sind ein Betrieb? →</a>
+      </div>
     </div>
   </div>
   <div class="status" aria-label="Beispiel einer Live-Statusanzeige">
@@ -43,6 +49,20 @@
     <div class="schritt" style="color:var(--light-muted)"><span class="punkt" style="border:2px solid #3B4252"></span><span>Erledigt und bewerten</span></div>
   </div>
 </section>
+
+@if($branchen->isNotEmpty())
+<section class="wrap" style="padding-bottom:72px;display:flex;flex-direction:column;gap:24px">
+  <h2 style="font-size:clamp(28px,3.2vw,40px)">Branchen</h2>
+  <div class="branchen">
+    @foreach($branchen as $b)
+      <a class="branche" href="/{{ $b['slug'] }}">
+        <strong style="font-family:'Space Grotesk',sans-serif;font-size:20px">{{ $b['name'] }}</strong>
+        <span class="muted" style="font-size:14px">{{ $b['anzahl'] === 0 ? 'demnächst' : ($b['anzahl'] === 1 ? '1 Betrieb' : $b['anzahl'].' Betriebe') }}</span>
+      </a>
+    @endforeach
+  </div>
+</section>
+@endif
 
 <section id="so-gehts" class="band">
   <div class="wrap">

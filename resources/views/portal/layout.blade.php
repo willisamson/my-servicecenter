@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>@yield('title', 'my-servicecenter – Fachbetriebe finden und live verfolgen')</title>
-<meta name="description" content="my-servicecenter verbindet Kunden mit Handwerks- und Servicebetrieben aus ihrer Region – Anfrage per Klick, Live-Status bis zum erledigten Auftrag.">
+<meta name="description" content="@yield('description', 'my-servicecenter verbindet Kunden mit Handwerks- und Servicebetrieben aus ihrer Region – Anfrage per Klick, Live-Status bis zum erledigten Auftrag.')">
+@stack('head')
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
@@ -27,6 +28,10 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.03em;line-heigh
 .footer{border-top:1px solid var(--line);margin-top:72px}
 .footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding-top:28px;padding-bottom:28px;font-size:14px;color:var(--muted)}
 .footer a{color:var(--muted)}
+.suche{display:flex;flex-wrap:wrap;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px}
+.suche select,.suche input{flex:1 1 180px;min-width:0;min-height:48px;border:1px solid var(--line);border-radius:14px;padding:0 14px;font:inherit;background:var(--bg);color:var(--ink)}
+.suche .btn{flex:0 0 auto}
+.suche label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 @stack('styles')
 </head>
@@ -42,6 +47,7 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.03em;line-heigh
       @endif
     </a>
     <nav class="nav" aria-label="Hauptnavigation">
+      <a href="/#suche">Betrieb finden</a>
       <a href="/#so-gehts">So funktioniert’s</a>
       <a href="/#betriebe">Für Betriebe</a>
     </nav>

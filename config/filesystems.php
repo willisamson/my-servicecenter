@@ -47,6 +47,49 @@ return [
             'report' => false,
         ],
 
+        /*
+        | Eigene Speicher für my-servicecenter. Diese Pfade stehen fest (zentral) und werden
+        | von der Mandanten-Trennung NICHT umgebogen – getrennt wird über Unterordner je Betrieb.
+        */
+
+        // Öffentliche Dateien der Betriebe (Logos): /storage/betriebe/<betrieb>/…
+        'betriebe_public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/betriebe'),
+            'url' => '/storage/betriebe',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Private Dateien der Betriebe (Auftragsfotos). Nur über signierte, zeitlich begrenzte Links.
+        'betriebe_privat' => [
+            'driver' => 'local',
+            'root' => storage_path('app/betriebe'),
+            'url' => '/betriebsdateien',
+            'serve' => true,
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Zwischenspeicher für Uploads (Livewire), gleich für Portal und Betriebe.
+        'uploads_tmp' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads-tmp'),
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Archiv der erzeugten Rechnungs-PDFs (unveränderbar abgelegt).
+        'rechnungen' => [
+            'driver' => 'local',
+            'root' => storage_path('app/rechnungen'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

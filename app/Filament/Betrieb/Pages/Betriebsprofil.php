@@ -4,6 +4,7 @@ namespace App\Filament\Betrieb\Pages;
 
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -16,6 +17,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Stammdaten und Auftritt des Betriebs. Daraus entsteht später die Mini-Website.
@@ -35,7 +37,7 @@ class Betriebsprofil extends Page
     protected const FELDER = [
         'name', 'ort', 'email', 'telefon', 'strasse', 'plz',
         'beschreibung', 'leistungen', 'oeffnungszeiten', 'notdienst',
-        'impressum', 'datenschutz', 'im_portal',
+        'impressum', 'datenschutz', 'im_portal', 'logo',
     ];
 
     public ?array $data = [];
@@ -70,6 +72,16 @@ class Betriebsprofil extends Page
                     ]),
                 Section::make('Auftritt')
                     ->schema([
+                        FileUpload::make('logo')
+                            ->label('Logo')
+                            ->helperText('PNG, JPG oder WebP, max. 2 MB. Erscheint auf Ihrer Website, in der Portal-Suche und oben im Dashboard. Am besten quer und mit transparentem Hintergrund.')
+                            ->image()
+                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                            ->disk('betriebe_public')
+                            ->directory(fn (): string => (string) tenant('id'))
+                            ->visibility('public')
+                            ->maxSize(2048)
+                            ->imageEditor(),
                         Textarea::make('beschreibung')
                             ->label('Über uns')
                             ->helperText('Kurzer Text für die Mini-Website: wer ihr seid, was ihr gut könnt, wo ihr arbeitet.')
@@ -141,6 +153,12 @@ class Betriebsprofil extends Page
                 ->warning()
                 ->persistent()
                 ->send();
+        }
+
+        // Altes Logo löschen, wenn ein neues hochgeladen oder das Logo entfernt wurde.
+        $altesLogo = tenant('logo');
+        if (filled($altesLogo) && $altesLogo !== ($daten['logo'] ?? null)) {
+            Storage::disk('betriebe_public')->delete($altesLogo);
         }
 
         tenant()->update(array_intersect_key($daten, array_flip(self::FELDER)));

@@ -95,7 +95,7 @@ class UserResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->hidden(fn (User $record): bool => $record->is(auth()->user())),
+                    ->hidden(fn (User $record): bool => $record->is(auth()->user()) || $record->arbeitszeiten()->exists()),
             ]);
     }
 

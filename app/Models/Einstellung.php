@@ -43,8 +43,9 @@ class Einstellung extends Model
 
     public static function speichern(array $daten): void
     {
+        // Zusammenführen: Firmendaten und Rechnungslayout werden auf getrennten Seiten gepflegt.
         $eintrag = static::aktuell();
-        $eintrag->update(['daten' => $daten]);
+        $eintrag->update(['daten' => array_merge($eintrag->daten ?? [], $daten)]);
         static::$aktuell = $eintrag;
     }
 

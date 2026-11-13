@@ -98,7 +98,7 @@ Artisan::command('betrieb:demo {email : Login-E-Mail des Inhabers (bekommt auch 
 
         \App\Models\User::create(['name' => 'Max Muster', 'email' => $email, 'password' => $passwort, 'rolle' => 'inhaber']);
         \App\Models\User::create(['name' => 'Anna Büro', 'email' => 'buero@demo.test', 'password' => $passwort, 'rolle' => 'buero']);
-        \App\Models\User::create(['name' => 'Tom Monteur', 'email' => 'monteur@demo.test', 'password' => $passwort, 'rolle' => 'mitarbeiter']);
+        $tom = \App\Models\User::create(['name' => 'Tom Monteur', 'email' => 'monteur@demo.test', 'password' => $passwort, 'rolle' => 'mitarbeiter']);
 
         $beispiele = [
             ['status' => 'neu', 'anliegen' => 'stoerung', 'name' => 'Petra Schmidt', 'telefon' => '0123 111222', 'plz' => '12345', 'adresse' => 'Lindenweg 4',
@@ -108,11 +108,11 @@ Artisan::command('betrieb:demo {email : Login-E-Mail des Inhabers (bekommt auch 
             ['status' => 'angenommen', 'anliegen' => 'wartung', 'name' => 'Jonas Weber', 'telefon' => '0123 333444', 'plz' => '12345',
                 'beschreibung' => 'Jährliche Wartung der Gastherme ist fällig.', 'wunschtermin' => 'vormittags', 'vor' => now()->subDay()],
             ['status' => 'termin', 'anliegen' => 'stoerung', 'name' => 'Sabine Kraus', 'telefon' => '0123 555666', 'plz' => '12349', 'adresse' => 'Am Markt 7',
-                'beschreibung' => 'Die Heizkörper im Obergeschoss werden nicht mehr richtig warm.', 'termin_am' => now($berlin)->addDay()->setTime(9, 0)->utc(), 'vor' => now()->subDays(2)],
+                'beschreibung' => 'Die Heizkörper im Obergeschoss werden nicht mehr richtig warm.', 'termin_am' => now($berlin)->addDay()->setTime(9, 0)->utc(), 'mitarbeiter_id' => $tom->id, 'vor' => now()->subDays(2)],
             ['status' => 'unterwegs', 'anliegen' => 'sonstiges', 'name' => 'Michael Hoffmann', 'telefon' => '0123 777888', 'plz' => '12345',
-                'beschreibung' => 'Austausch von drei Thermostatventilen im Erdgeschoss.', 'termin_am' => now($berlin)->setTime(14, 0)->utc(), 'vor' => now()->subDays(4)],
+                'beschreibung' => 'Austausch von drei Thermostatventilen im Erdgeschoss.', 'termin_am' => now($berlin)->setTime(14, 0)->utc(), 'mitarbeiter_id' => $tom->id, 'vor' => now()->subDays(4)],
             ['status' => 'erledigt', 'anliegen' => 'wartung', 'name' => 'Klaus Meyer', 'email' => 'meyer@example.com', 'plz' => '12346',
-                'beschreibung' => 'Wartung Ölheizung inkl. Abgasmessung.', 'termin_am' => now($berlin)->subDays(3)->setTime(10, 30)->utc(), 'notiz_intern' => 'Brennerdüse getauscht, Rechnung raus.', 'vor' => now()->subDays(6)],
+                'beschreibung' => 'Wartung Ölheizung inkl. Abgasmessung.', 'termin_am' => now($berlin)->subDays(3)->setTime(10, 30)->utc(), 'mitarbeiter_id' => $tom->id, 'notiz_intern' => 'Brennerdüse getauscht, Rechnung raus.', 'vor' => now()->subDays(6)],
         ];
 
         foreach ($beispiele as $beispiel) {
@@ -121,6 +121,14 @@ Artisan::command('betrieb:demo {email : Login-E-Mail des Inhabers (bekommt auch 
 
             $anfrage = \App\Models\Anfrage::create($beispiel);
             $anfrage->forceFill(['created_at' => $zeit, 'updated_at' => $zeit])->save();
+
+            // Erledigter Auftrag: Beispiel für Notiz, Material und Arbeitszeit
+            if ($anfrage->status === 'erledigt') {
+                \App\Models\AuftragNotiz::create(['anfrage_id' => $anfrage->id, 'user_id' => $tom->id, 'text' => 'Brennerdüse getauscht, Abgasmessung i. O. (Verlust 6 %). Kunde wünscht Angebot für Brennwerttechnik.']);
+                \App\Models\AuftragMaterial::create(['anfrage_id' => $anfrage->id, 'user_id' => $tom->id, 'bezeichnung' => 'Ölbrennerdüse 0,60 gph 60° S', 'menge' => 1, 'einheit' => 'Stk']);
+                \App\Models\AuftragMaterial::create(['anfrage_id' => $anfrage->id, 'user_id' => $tom->id, 'bezeichnung' => 'Ölfilter-Einsatz', 'menge' => 1, 'einheit' => 'Stk']);
+                \App\Models\Arbeitszeit::create(['user_id' => $tom->id, 'anfrage_id' => $anfrage->id, 'beginn' => $anfrage->termin_am, 'ende' => $anfrage->termin_am->copy()->addMinutes(95)]);
+            }
         }
     });
 
@@ -137,3 +145,62 @@ Artisan::command('betrieb:demo {email : Login-E-Mail des Inhabers (bekommt auch 
 
     return 0;
 })->purpose('Legt den Vorführ-Betrieb "demo" mit Beispieldaten an');
+
+/*
+| Abos abrechnen: erstellt alle fälligen Rechnungen und schickt sie per Mail.
+|   php artisan abos:abrechnen            (wirklich abrechnen)
+|   php artisan abos:abrechnen --test     (nur anzeigen, was passieren würde)
+| Läuft automatisch jeden Morgen, wenn RECHNUNGEN_AUTOMATISCH=true gesetzt ist.
+*/
+Artisan::command('abos:abrechnen {--test : Nichts erstellen, nur anzeigen}', function () {
+    if ($fehlt = \App\Services\Rechnungsstellung::fehlendeAngaben()) {
+        $this->error('In den Einstellungen fehlen noch: '.implode(', ', $fehlt));
+
+        return 1;
+    }
+
+    $dienst = app(\App\Services\Rechnungsstellung::class);
+    $anzahl = 0;
+
+    foreach (\App\Models\Abo::query()->faellig()->with('tarif', 'betrieb')->get() as $abo) {
+        // Nachholen, falls der Server ein paar Tage aus war – höchstens 12 Zeiträume.
+        for ($runde = 0; $runde < 12 && $abo->naechste_rechnung_am?->lte(today()) && $abo->laeuftAm($abo->naechste_rechnung_am); $runde++) {
+            $name = $abo->betrieb?->name ?? $abo->tenant_id;
+
+            if ($abo->monatspreis() <= 0) {
+                $this->line("  {$name}: Preis 0 € – keine Rechnung, Zeitraum übersprungen");
+                if ($this->option('test')) {
+                    break;
+                }
+
+                $abo->update(['naechste_rechnung_am' => $abo->zeitraumEnde($abo->naechste_rechnung_am)->addDay()]);
+
+                continue;
+            }
+
+            if ($this->option('test')) {
+                $this->line("  {$name}: würde ab ".$abo->naechste_rechnung_am->format('d.m.Y').' abgerechnet');
+                break;
+            }
+
+            try {
+                $rechnung = $dienst->fuerAbo($abo);
+                $gesendet = $dienst->versenden($rechnung);
+                $anzahl++;
+                $this->info("  {$name}: {$rechnung->nummer} ".\App\Models\Rechnung::euro($rechnung->brutto).($gesendet ? ' – gesendet' : ' – KEINE E-Mail hinterlegt'));
+            } catch (\Throwable $e) {
+                report($e);
+                $this->error("  {$name}: Fehler – ".$e->getMessage());
+                break;
+            }
+
+            $abo->refresh();
+        }
+    }
+
+    $this->info("Fertig: {$anzahl} Rechnung(en) erstellt.");
+})->purpose('Erstellt die fälligen Abo-Rechnungen und verschickt sie');
+
+if (config('portal.rechnungen_automatisch')) {
+    \Illuminate\Support\Facades\Schedule::command('abos:abrechnen')->dailyAt('07:00')->withoutOverlapping();
+}

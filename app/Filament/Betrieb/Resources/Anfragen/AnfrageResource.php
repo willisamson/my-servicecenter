@@ -5,7 +5,10 @@ namespace App\Filament\Betrieb\Resources\Anfragen;
 use App\Filament\Betrieb\Resources\Anfragen\Pages\CreateAnfrage;
 use App\Filament\Betrieb\Resources\Anfragen\Pages\EditAnfrage;
 use App\Filament\Betrieb\Resources\Anfragen\Pages\ListAnfragen;
+use App\Filament\Betrieb\RelationManagers\MaterialRelationManager;
+use App\Filament\Betrieb\RelationManagers\NotizenRelationManager;
 use App\Models\Anfrage;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -71,10 +74,23 @@ class AnfrageResource extends Resource
                         ->options(Anfrage::STATUS)
                         ->default('neu')
                         ->required(),
+                    Select::make('mitarbeiter_id')
+                        ->label('Zuständig')
+                        ->helperText('Der Mitarbeiter sieht den Auftrag dann unter „Meine Aufträge“ und im Kalender.')
+                        ->options(fn (): array => User::auswahl())
+                        ->searchable()
+                        ->placeholder('Noch niemand'),
                     DateTimePicker::make('termin_am')
                         ->label('Termin')
+                        ->helperText('Mit Termin steht beim Kunden automatisch „Termin bestätigt“.')
                         ->seconds(false)
+                        ->minutesStep(15)
                         ->timezone('Europe/Berlin'),
+                    Select::make('termin_dauer')
+                        ->label('Dauer')
+                        ->options([30 => '30 Minuten', 60 => '1 Stunde', 90 => '1,5 Stunden', 120 => '2 Stunden', 180 => '3 Stunden', 240 => '4 Stunden', 480 => 'ganzer Tag'])
+                        ->default(60)
+                        ->selectablePlaceholder(false),
                     TextEntry::make('status_link')
                         ->label('Status-Link für den Kunden')
                         ->helperText('Diesen Link sieht der Kunde nach dem Absenden. Bei telefonischen Anfragen können Sie ihn per SMS oder E-Mail weitergeben.')
@@ -140,16 +156,30 @@ class AnfrageResource extends Resource
                     ->dateTime('d.m.Y H:i', 'Europe/Berlin')
                     ->placeholder('–')
                     ->sortable(),
+                TextColumn::make('mitarbeiter.name')
+                    ->label('Zuständig')
+                    ->placeholder('–'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options(Anfrage::STATUS),
+                SelectFilter::make('mitarbeiter_id')
+                    ->label('Zuständig')
+                    ->options(fn (): array => User::auswahl()),
             ])
             ->recordActions([
                 EditAction::make(),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            NotizenRelationManager::class,
+            MaterialRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

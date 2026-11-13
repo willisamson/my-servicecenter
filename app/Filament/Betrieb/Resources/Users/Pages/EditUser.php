@@ -14,7 +14,8 @@ class EditUser extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->hidden(fn (): bool => $this->record->is(auth()->user())),
+                // Mit erfassten Arbeitszeiten nicht löschbar (Aufbewahrungspflicht) – stattdessen Passwort ändern.
+                ->hidden(fn (): bool => $this->record->is(auth()->user()) || $this->record->arbeitszeiten()->exists()),
         ];
     }
 }

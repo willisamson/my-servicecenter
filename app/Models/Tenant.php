@@ -85,6 +85,14 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         return Branche::label($this->branche);
     }
 
+    /** Adresse des Logos (falls hochgeladen), z. B. /storage/betriebe/demo/logo.png */
+    public function logoUrl(): ?string
+    {
+        return filled($this->logo)
+            ? \Illuminate\Support\Facades\Storage::disk('betriebe_public')->url($this->logo)
+            : null;
+    }
+
     /** Kürzel für das Logo-Feld, z. B. "Heinz der Heizfritze" → "HD". */
     public function initialen(): string
     {

@@ -52,6 +52,22 @@ class User extends Authenticatable implements FilamentUser
         };
     }
 
+    public function auftraege(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Anfrage::class, 'mitarbeiter_id');
+    }
+
+    public function arbeitszeiten(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Arbeitszeit::class);
+    }
+
+    /** Auswahlliste aller Benutzer des Betriebs: id => Name. */
+    public static function auswahl(): array
+    {
+        return static::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
+
     public function istInhaber(): bool
     {
         return $this->rolle === 'inhaber';

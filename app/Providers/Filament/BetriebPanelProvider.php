@@ -33,6 +33,8 @@ class BetriebPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login()
             ->brandName(fn (): string => tenant('name') ?? 'my-servicecenter')
+            ->brandLogo(fn (): ?string => tenant()?->logoUrl())
+            ->brandLogoHeight('2.5rem')
             ->colors([
                 'primary' => Color::Orange,
             ])

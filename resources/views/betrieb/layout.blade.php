@@ -41,7 +41,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="{{ route('betrieb.website') }}"><span class="logo" aria-hidden="true">{{ $betrieb->initialen() }}</span>{{ $betrieb->name }}</a>
+    <a class="brand" href="{{ route('betrieb.website') }}">
+      @if($logoUrl = $betrieb->logoUrl())
+        <img src="{{ $logoUrl }}" alt="{{ $betrieb->name }}" style="height:48px;width:auto;max-width:220px;object-fit:contain;display:block">
+      @else
+        <span class="logo" aria-hidden="true">{{ $betrieb->initialen() }}</span>{{ $betrieb->name }}
+      @endif
+    </a>
     @yield('nav')
   </div>
 </header>

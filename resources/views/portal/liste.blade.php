@@ -71,7 +71,11 @@
       @foreach($betriebe as $b)
         <a class="betrieb" href="{{ $b->subdomainUrl() }}">
           <div class="zeile">
-            <span class="initialen" aria-hidden="true">{{ $b->initialen() }}</span>
+            @if($logo = $b->logoUrl())
+              <img src="{{ $logo }}" alt="" loading="lazy" style="width:48px;height:48px;flex:0 0 48px;border-radius:14px;object-fit:contain;background:#fff;border:1px solid var(--line)">
+            @else
+              <span class="initialen" aria-hidden="true">{{ $b->initialen() }}</span>
+            @endif
             <div style="min-width:0">
               <h2 style="font-size:21px;overflow-wrap:anywhere">{{ $b->name }}</h2>
               <span class="muted" style="font-size:14px">{{ $b->brancheLabel() }}@if($b->ort) · {{ trim(($b->plz ?? '').' '.$b->ort) }}@endif</span>
